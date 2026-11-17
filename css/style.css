@@ -1,0 +1,48 @@
+html,body{margin:0;height:100%;overflow:hidden;background:#e8edf2;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+:root{--ar:1.562;--font-ui:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--font-display:Georgia,"Times New Roman",serif;--color-ink:#26313d;--color-muted:#677586;--color-accent:#557c9c;--color-accent-soft:#e7eff5;--color-line:#d5dde5;--color-surface:#f8fafc;--radius-control:12px;--radius-panel:18px;--shadow-soft:0 12px 34px rgba(33,48,64,.16)}
+
+/* 舞台:維持圖片長寬比,置中並盡量填滿視窗 */
+#stage{position:absolute;inset:0;margin:auto;
+  width:min(100vw,calc(100vh * var(--ar)));
+  height:min(100vh,calc(100vw / var(--ar)))}
+#scene{position:absolute;inset:0}
+#desk{display:block;width:100%;height:100%;user-select:none;-webkit-user-drag:none}
+
+/* 桌面內容層:各物件的唯讀畫面(內容與子頁同步) */
+#desk-content{position:absolute;inset:0;pointer-events:none}
+
+/* 盆栽葉片圖層(每片葉子是獨立的 <img>,位置/轉軸由 js 設定) */
+#plant-leaves{position:absolute;inset:0;pointer-events:none}
+
+/* 熱區:hover 不發光、不浮起;只有低調的鍵盤焦點提示 */
+#hotspots{position:absolute;inset:0}
+.busy #hotspots{pointer-events:none}
+.hotspot{position:absolute;padding:0;margin:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.hotspot:focus-visible{outline:2px dashed rgba(74,57,44,.75);outline-offset:3px}
+.egg-plant{cursor:default}
+
+/* debug 模式(網址加 ?debug=1) */
+.debug .hotspot{background:hsla(var(--hue),90%,55%,.35);outline:1px dashed #fff}
+.debug .hotspot::after{content:attr(data-label);position:absolute;left:2px;top:2px;font:11px/1.2 sans-serif;color:#000;background:#fffc;padding:1px 3px}
+
+/* 彩蛋:檯燈光(範圍柔弱的扇形暖黃光,位置/大小可微調;預設關) */
+#lamp-glow{position:absolute;left:46%;top:56.5%;width:36%;height:38%;opacity:0;pointer-events:none;
+  mix-blend-mode:screen;filter:blur(12px);transition:opacity .3s ease}
+#lamp-glow.on{opacity:.62}
+#lamp-glow i{position:absolute;inset:0;
+  background:radial-gradient(ellipse 75% 100% at 50% 0,rgba(255,214,120,.9),rgba(255,200,100,.35) 55%,transparent 80%);
+  clip-path:polygon(41% 0,59% 0,100% 100%,0 100%)}
+
+/* [?] 說明 */
+#help{position:fixed;right:16px;bottom:16px;width:38px;height:38px;border-radius:50%;border:1px solid var(--color-line);
+  background:rgba(248,250,252,.94);color:var(--color-ink);font:bold 16px var(--font-ui);cursor:pointer;z-index:5;box-shadow:0 3px 12px rgba(33,48,64,.14);backdrop-filter:blur(12px)}
+#help-panel{position:fixed;right:16px;bottom:62px;max-width:290px;padding:16px;border-radius:var(--radius-panel);
+  background:rgba(248,250,252,.96);color:var(--color-ink);font:14px/1.65 var(--font-ui);box-shadow:var(--shadow-soft);border:1px solid rgba(255,255,255,.8);z-index:5;backdrop-filter:blur(18px)}
+#help-panel[hidden]{display:none}
+.in-sub #help,.in-sub #help-panel{display:none}
+#help-panel p{margin:0 0 8px}
+.help-actions{border-top:1px dashed #b9a98a;padding-top:8px}
+#clear-confirm[hidden]{display:none}
+#help-panel .btn{display:inline-block;padding:7px 12px;border:1px solid var(--color-line);border-radius:999px;background:var(--color-surface);color:var(--color-ink);font:inherit;font-size:13px;cursor:pointer}
+#help-panel .btn:hover{background:var(--color-accent-soft)}
+#help-panel .btn.danger{background:#f8e8e9;color:#8d4149}

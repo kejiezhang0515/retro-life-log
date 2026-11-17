@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retro Life-Log</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <!-- 手繪抖動濾鏡(拍立得外框用) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="rough" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="4"/>
+      <feDisplacementMap in="SourceGraphic" scale="3"/>
+    </filter>
+  </svg>
+
+  <!-- 首頁:書桌場景(盆栽葉片已分離成獨立圖層,見 js/plant-leaves.js) -->
+  <div id="stage">
+    <div id="scene">
+      <img id="desk" src="assets/derived/desk-clean.png" alt="書桌" draggable="false">
+      <div id="desk-content" aria-hidden="true"></div>
+      <div id="plant-leaves" aria-hidden="true"></div>
+      <div id="lamp-glow"><i></i></div>
+      <div id="hotspots"></div>
+    </div>
+  </div>
+
+  <button id="help" type="button" aria-label="說明">?</button>
+  <div id="help-panel" hidden>
+    <p>點擊書桌上的物件放大並開啟內容。<br>月曆 / 剪貼板 / 筆記本:從右側面板加入相框、貼紙與文字,拖曳、拉四角縮放、轉動把手旋轉。<br>試試看盆栽與檯燈。<br>電腦:點鍵盤最下排的空白鍵可暫停 / 播放影片。</p>
+    <p class="help-credit">Page turns by <a href="js/vendor/grabfold.LICENSE" target="_blank" rel="noopener">grabfold</a>(MIT)</p>
+    <div class="help-actions">
+      <button class="btn small" id="clear-all" type="button">清除全部資料</button>
+      <div id="clear-confirm" hidden>
+        <p>確定要清除嗎?文字、照片、影片都會刪除,無法復原。</p>
+        <button class="btn small danger" id="clear-yes" type="button">確定清除</button>
+        <button class="btn small" id="clear-no" type="button">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 電腦 -->
+  <section class="page" id="page-laptop" role="dialog" aria-modal="true" aria-label="電腦">
+    <button class="back" type="button" data-ui>← 返回首頁</button>
+    <div class="zoom-area">
+      <div id="laptop-obj" data-flip></div>
+      <div class="controls" data-ui>
+        <label class="btn file-btn"><span id="laptop-pick-label">選擇影片</span><input class="sr-only" id="laptop-file" type="file" accept=".mp4,.mov,.webm,video/mp4,video/quicktime,video/webm"></label>
+        <button class="btn" id="laptop-remove" type="button" disabled>移除影片</button>
+        <p class="note" id="laptop-note" aria-live="polite">影片限 10 秒內(mp4、mov、webm),會靜音循環播放。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 剪貼板 -->
+  <section class="page has-panel" id="page-photos" role="dialog" aria-modal="true" aria-label="剪貼板">
+    <button class="back" type="button" data-ui>← 返回首頁</button>
+    <div class="zoom-area"><div id="board-obj" data-flip></div></div>
+  </section>
+
+  <!-- to-do list -->
+  <section class="page" id="page-todo" role="dialog" aria-modal="true" aria-label="to-do list">
+    <button class="back" type="button" data-ui>← 返回首頁</button>
+    <div class="zoom-area"><div id="todo-obj" data-flip></div></div>
+  </section>
+
+  <!-- daily plan -->
+  <section class="page" id="page-daily" role="dialog" aria-modal="true" aria-label="daily plan">
+    <button class="back" type="button" data-ui>← 返回首頁</button>
+    <div class="zoom-area"><div id="daily-obj" data-flip></div></div>
+  </section>
+
+  <!-- 月曆 -->
+  <section class="page has-panel" id="page-month" role="dialog" aria-modal="true" aria-label="月曆">
+    <button class="back" type="button" data-ui>← 返回首頁</button>
+    <div class="zoom-area"><div id="cal-obj" data-flip></div></div>
+  </section>
+
+  <!-- 筆記本 -->
+  <section class="page has-panel" id="page-diary" role="dialog" aria-modal="true" aria-label="筆記本">
+    <button class="back" type="button" data-ui>← 返回首頁</button>
+    <div class="zoom-area">
+      <div class="nb-wrap" id="nb-wrap" data-flip>
+        <div class="nb-book" id="nb-book"></div>
+        <div class="nb-target" id="nb-target" data-flip-target aria-hidden="true"></div>
+      </div>
+      <div class="controls nb-controls" id="nb-controls" data-ui>
+        <button class="btn" id="nb-prev" type="button">‹ 上一頁</button>
+        <span class="pager" id="nb-pager" aria-live="polite">抓住封面拖曳來翻開</span>
+        <button class="btn" id="nb-next" type="button">下一頁 ›</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 黑膠唱片機(純視覺,沒有音訊) -->
+  <section class="page" id="page-vinyl" role="dialog" aria-modal="true" aria-label="黑膠唱片機">
+    <button class="back" type="button" data-ui>← 返回首頁</button>
+    <div class="zoom-area vinyl-area">
+      <div class="vinyl-left">
+        <div class="rec" id="rec" data-flip>
+          <img class="rec-base" src="assets/vinyl/base.png" alt="黑膠唱片機" draggable="false">
+          <div class="rec-disc" id="rec-disc"><img src="assets/vinyl/disc.png" alt="" draggable="false">
+            <div class="rec-label"><img id="rec-label-img" alt="" draggable="false"></div><i class="rec-hole" aria-hidden="true"></i></div>
+          <div class="rec-gloss" aria-hidden="true"></div>
+          <div class="rec-arm" id="rec-arm"><img src="assets/vinyl/arm.png" alt="" draggable="false"><span class="arm-hit" id="arm-hit" title="拖曳唱臂"></span></div>
+        </div>
+        <div class="vinyl-ui" data-ui>
+          <p class="now" id="now" aria-live="polite"></p>
+          <button class="btn" id="arm-toggle" type="button">放下唱針</button>
+        </div>
+      </div>
+      <div class="arc" id="arc" data-ui role="listbox" aria-label="唱片封面(上下滑動或點選)" tabindex="0"></div>
+    </div>
+  </section>
+
+  <script src="js/config.js"></script>
+  <script src="js/library.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/plant-leaves.js"></script>
+  <script src="js/hotspots.js"></script>
+  <script src="js/plant.js"></script>
+  <script src="js/lamp.js"></script>
+  <script src="js/zoom.js"></script>
+  <script src="js/panel.js"></script>
+  <script src="js/placer.js"></script>
+  <script src="js/vendor/grabfold.min.js"></script>
+  <script src="js/page-laptop.js"></script>
+  <script src="js/page-clipboard.js"></script>
+  <script src="js/page-paper.js"></script>
+  <script src="js/page-calendar.js"></script>
+  <script src="js/page-notebook.js"></script>
+  <script src="js/page-vinyl.js"></script>
+  <script src="js/hub-layer.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
